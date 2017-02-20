@@ -1,5 +1,6 @@
 from flickrDownloader import *
 
+
 api_key = "INSERT_HERE_YOUR_API_KEY"  # if you want to insert your apikey in source code
 api_key = "flickr.apikey"  # if you want to read apikey from file
 
