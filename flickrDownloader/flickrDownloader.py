@@ -79,7 +79,8 @@ def flickr_photos_search(api_key_or_file_path,                      # type: str
                          tag_mode=FlickrTagMode.default,            # type: FlickrTagMode
                          content_type=FlickrContentType.default,    # type: FlickrContentType
                          media=FlickrMedia.default,                 # type: FlickrMedia
-                         response_format=FlickrResponseFormat.JSON  # type: FlickrResponseFormat
+                         response_format=FlickrResponseFormat.JSON,  # type: FlickrResponseFormat
+                         license_id=None
                          ):
     # type: (str, int, str, str, FlickrTagMode, FlickrContentType, FlickrMedia, FlickrResponseFormat) -> list(Response)
     """
@@ -103,6 +104,9 @@ def flickr_photos_search(api_key_or_file_path,                      # type: str
     #  query.replace(" ", "%20")
     query += content_type.value + media.value + response_format.value + FlickrPrivacyFilter.public.value
 
+    if license_id is not None:
+        query += "&license_id=" + str(license_id)
+
     rest = n_images % MAX_IMAGES_PER_PAGE
     n_queries = n_images/MAX_IMAGES_PER_PAGE
     query_len_list = [MAX_IMAGES_PER_PAGE] * n_queries
@@ -125,6 +129,7 @@ def flickr_photos_links(api_key_or_file_path,                    # type: str
                         tag_mode=FlickrTagMode.default,          # type: FlickrTagMode
                         content_type=FlickrContentType.default,  # type: FlickrContentType
                         media=FlickrMedia.default,               # type: FlickrMedia
+                        license_id=None,
                         verbose=False,
                         ignore_errors=False
                         ):
@@ -133,7 +138,7 @@ def flickr_photos_links(api_key_or_file_path,                    # type: str
     responses = flickr_photos_search(api_key_or_file_path=api_key_or_file_path,  n_images=n_images,
                                      query_text=query_text, tags=tags, tag_mode=tag_mode,
                                      content_type=content_type, media=media,
-                                     response_format=FlickrResponseFormat.JSON)
+                                     response_format=FlickrResponseFormat.JSON, license_id=license_id)
     links = []
 
     for response in responses:
@@ -170,6 +175,7 @@ def flickr_photos_downloader(api_key_or_file_path,                    # type: st
                              image_size=FlickrImageSize.default,      # type: FlickrImageSize
                              content_type=FlickrContentType.default,  # type: FlickrContentType
                              media=FlickrMedia.default,               # type: FlickrMedia
+                             license_id=None,
                              download_path="",
                              save_filename_prefix="flickr_",
                              forced_extension=None,
@@ -180,7 +186,7 @@ def flickr_photos_downloader(api_key_or_file_path,                    # type: st
 
     links = flickr_photos_links(api_key_or_file_path=api_key_or_file_path, query_text=query_text, tags=tags, n_images=n_images,
                                 image_size=image_size, tag_mode=tag_mode, content_type=content_type, media=media,
-                                verbose=verbose, ignore_errors=ignore_errors)
+                                verbose=verbose, ignore_errors=ignore_errors, license_id=license_id)
     web_downloader(link_list=links, download_path=download_path, save_filename_prefix=save_filename_prefix,
                    forced_extension=forced_extension, verbose=verbose, ignore_errors=ignore_errors)
     return links
