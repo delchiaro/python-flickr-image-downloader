@@ -8,57 +8,57 @@ from utils import web_downloader
 
 # TODO: always using public for now
 class FlickrPrivacyFilter(Enum):
-    default         = ""
-    public          = "&privacy_filter=1"
-    friends         = "&privacy_filter=2"
-    family          = "&privacy_filter=3"
-    friends_family  = "&privacy_filter=4"
-    private         = "&privacy_filter=5"
+    default         = u""
+    public          = u"&privacy_filter=1"
+    friends         = u"&privacy_filter=2"
+    family          = u"&privacy_filter=3"
+    friends_family  = u"&privacy_filter=4"
+    private         = u"&privacy_filter=5"
 
 
 class FlickrContentType(Enum):
-    default                  = ""
-    photos                   = "&content_type=1"
-    screenshoots             = "&content_type=2"
-    other                    = "&content_type=3"
-    photos_screenshots       = "&content_type=4"
-    screenshoots_other       = "&content_type=5"
-    photos_other             = "&content_type=6"
-    photos_screenshots_other = "&content_type=7"
+    default                  = u""
+    photos                   = u"&content_type=1"
+    screenshoots             = u"&content_type=2"
+    other                    = u"&content_type=3"
+    photos_screenshots       = u"&content_type=4"
+    screenshoots_other       = u"&content_type=5"
+    photos_other             = u"&content_type=6"
+    photos_screenshots_other = u"&content_type=7"
 
 
 class FlickrTagMode(Enum):
-    default = ""
-    any     = '&tag_mode=any' # logic OR
-    all     = '&tag_mode=all' # logic AND
+    default = u""
+    any     = u'&tag_mode=any' # logic OR
+    all     = u'&tag_mode=all' # logic AND
 
 
 class FlickrMedia(Enum):
-    default = ""
-    photos  = "&media=photos"
-    videos  = "&media=videos"
+    default = u""
+    photos  = u"&media=photos"
+    videos  = u"&media=videos"
 
 
 class FlickrResponseFormat(Enum):
-    JSON       = "&format=json&nojsoncallback=1"
-    JSONP      = "&format=json"
-    XML        = "&format=rest"
-    PHP_SERIAL = "&format=php_serial"
+    JSON       = u"&format=json&nojsoncallback=1"
+    JSONP      = u"&format=json"
+    XML        = u"&format=rest"
+    PHP_SERIAL = u"&format=php_serial"
     default = JSON
 
 class FlickrImageSize(Enum):
-    default = ""
-    square_75x75   = "_s"  # 75 x 75
-    square_150x150 = "_q"  # 150 x 150
-    longedge_100   = "_t"  # 100 on the longest edge
-    longedge_240   = "_m"  # 240 on the longest edge
-    longedge_320   = "_n"  # 320 on the longest edge
-    longedge_500   = "_-"  # 500 on the longest edge
-    longedge_640   = "_z"  # 640 on the longest edge
-    longedge_800   = "_c"  # 800 on the longest edge (flickr new feature from 01/03/2012)
-    longedge_1024  = "_b"  # 1024 on the longest edge
-    longedge_1600  = "_h"  # 1600 on the longest edge (flickr new feature from 01/03/2012)
-    longedge_2048  = "_k"  # 2048 on the longest edge (flickr new feature from 01/03/2012)
+    default = u""
+    square_75x75   = u"_s"  # 75 x 75
+    square_150x150 = u"_q"  # 150 x 150
+    longedge_100   = u"_t"  # 100 on the longest edge
+    longedge_240   = u"_m"  # 240 on the longest edge
+    longedge_320   = u"_n"  # 320 on the longest edge
+    longedge_500   = u"_-"  # 500 on the longest edge
+    longedge_640   = u"_z"  # 640 on the longest edge
+    longedge_800   = u"_c"  # 800 on the longest edge (flickr new feature from 01/03/2012)
+    longedge_1024  = u"_b"  # 1024 on the longest edge
+    longedge_1600  = u"_h"  # 1600 on the longest edge (flickr new feature from 01/03/2012)
+    longedge_2048  = u"_k"  # 2048 on the longest edge (flickr new feature from 01/03/2012)
 
 
     # TODO: original image: jpg, gif or png according to the source format, not supported yet
@@ -72,40 +72,45 @@ class FlickrImageSize(Enum):
 #     default = jpg
 
 # TODO: add localizations
-def flickr_photos_search(api_key_or_file_path,                      # type: str
+def flickr_photos_search(api_key_or_file_path,                      # type: unicode
                          n_images=100,                              # type: int
-                         query_text=None,                           # type: str
-                         tags=None,                                 # type: str
+                         query_text=None,                           # type: unicode
+                         tags=None,                                 # type: unicode
                          tag_mode=FlickrTagMode.default,            # type: FlickrTagMode
                          content_type=FlickrContentType.default,    # type: FlickrContentType
                          media=FlickrMedia.default,                 # type: FlickrMedia
                          response_format=FlickrResponseFormat.JSON,  # type: FlickrResponseFormat
                          license_id=None
                          ):
-    # type: (str, int, str, str, FlickrTagMode, FlickrContentType, FlickrMedia, FlickrResponseFormat) -> list(Response)
+    # type: (unicode, int, unicode, unicode, FlickrTagMode, FlickrContentType, FlickrMedia, FlickrResponseFormat) -> list(Response)
     """
 
     :rtype: list(Response)
     """
     MAX_IMAGES_PER_PAGE = 500 # fixed by flickr api
-
-    if not isinstance(api_key_or_file_path, str):
-        raise ValueError("api_key_or_file_path must be a str (flickr api key or path to text file containing key).")
+    if isinstance(api_key_or_file_path, str):
+        api_key_or_file_path = unicode(api_key_or_file_path, "UTF-8")
+    if not isinstance(api_key_or_file_path, unicode):
+        raise ValueError(u"api_key_or_file_path must be a unicode (flickr api key or path to text file containing key).")
     api_key = string_or_path(api_key_or_file_path).split(" ")[0].split("\n")[0]
 
 
-    query = "https://api.flickr.com/services/rest/?method=flickr.photos.search"
-    query += "&api_key=" + api_key
+    query = u"https://api.flickr.com/services/rest/?method=flickr.photos.search"
+    query += u"&api_key=" + api_key
 
     if isinstance(query_text, str):
-        query += "&text=" + query_text
+        query_text = unicode(query_text, "UTF-8")
     if isinstance(tags, str):
-        query += "&tags=" + tags + tag_mode.value
+        tags = unicode(tags, "UTF-8")
+    if isinstance(query_text, unicode):
+        query += u"&text=" + query_text
+    if isinstance(tags, unicode):
+        query += u"&tags=" + tags + tag_mode.value
     #  query.replace(" ", "%20")
     query += content_type.value + media.value + response_format.value + FlickrPrivacyFilter.public.value
 
     if license_id is not None:
-        query += "&license_id=" + str(license_id)
+        query += u"&license_id=" + unicode(license_id)
 
     rest = n_images % MAX_IMAGES_PER_PAGE
     n_queries = n_images/MAX_IMAGES_PER_PAGE
@@ -115,16 +120,16 @@ def flickr_photos_search(api_key_or_file_path,                      # type: str
 
     responses = []
     for i, query_len in enumerate(query_len_list):
-        page_query = query + "&per_page=" + str(query_len) + "&page=" + str(i+1)
+        page_query = query + u"&per_page=" + unicode(query_len) + u"&page=" + unicode(i+1)
         responses.append(requests.get(page_query))
 
     return responses
 
 
-def flickr_photos_links(api_key_or_file_path,                    # type: str
+def flickr_photos_links(api_key_or_file_path,                    # type: unicode
                         n_images=100,                            # type: int
-                        query_text=None,                         # type: str
-                        tags=None,                               # type: str
+                        query_text=None,                         # type: unicode
+                        tags=None,                               # type: unicode
                         image_size=FlickrImageSize.default,      # type: FlickrImageSize
                         tag_mode=FlickrTagMode.default,          # type: FlickrTagMode
                         content_type=FlickrContentType.default,  # type: FlickrContentType
@@ -133,7 +138,7 @@ def flickr_photos_links(api_key_or_file_path,                    # type: str
                         verbose=False,
                         ignore_errors=False
                         ):
-    # type: (...) -> list(str)
+    # type: (...) -> list(unicode)
 
     responses = flickr_photos_search(api_key_or_file_path=api_key_or_file_path,  n_images=n_images,
                                      query_text=query_text, tags=tags, tag_mode=tag_mode,
@@ -149,40 +154,40 @@ def flickr_photos_links(api_key_or_file_path,                    # type: str
                 data = data['photos']['photo']
                 for d in data:
                     # https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
-                    lnk = "https://farm{}.staticflickr.com/{}/{}_{}{}.jpg"\
+                    lnk = u"https://farm{}.staticflickr.com/{}/{}_{}{}.jpg"\
                         .format(d['farm'], d['server'], d['id'], d['secret'], image_size.value)
                     links.append(lnk)
             else:
                 if not ignore_errors:
-                    print("Format error in received json (can't find key 'photos').")
+                    print(u"Format error in received json (can't find key 'photos').")
                     if 'message' in data.keys():
-                        print("Received Message: {}".format(data['message']))
+                        print(u"Received Message: {}".format(data['message'].encode("utf-8")))
 
         else:
             if not ignore_errors:
-                print("Flickr response not ok.")
+                print(u"Flickr response not ok.")
     if verbose:
-        print("Links retrived from flickr responses: {}".format(len(links)))
+        print(u"Links retrived from flickr responses: {}".format(len(links)))
     return links
 
 
 
-def flickr_photos_downloader(api_key_or_file_path,                    # type: str
+def flickr_photos_downloader(api_key_or_file_path,                    # type: unicode
                              n_images=100,                            # type: int
-                             query_text=None,                         # type: str
-                             tags=None,                               # type: str
+                             query_text=None,                         # type: unicode
+                             tags=None,                               # type: unicode
                              tag_mode=FlickrTagMode.default,          # type: FlickrTagMode
                              image_size=FlickrImageSize.default,      # type: FlickrImageSize
                              content_type=FlickrContentType.default,  # type: FlickrContentType
                              media=FlickrMedia.default,               # type: FlickrMedia
                              license_id=None,
-                             download_path="",
-                             save_filename_prefix="flickr_",
+                             download_path=u"",
+                             save_filename_prefix=u"flickr_",
                              forced_extension=None,
                              verbose=False,
                              ignore_errors=False
                              ):
-    # type: (...) -> list(str)
+    # type: (...) -> list(unicode)
 
     links = flickr_photos_links(api_key_or_file_path=api_key_or_file_path, query_text=query_text, tags=tags, n_images=n_images,
                                 image_size=image_size, tag_mode=tag_mode, content_type=content_type, media=media,
