@@ -58,3 +58,5 @@ def web_downloader(link_list, download_path, save_filename_prefix="", forced_ext
         print("\nAll are downloaded")
     if verbose or not ignore_errors:
         print("Total Errors ----> " + str(error_count) )
+
+    return error_count
