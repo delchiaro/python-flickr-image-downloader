@@ -137,14 +137,14 @@ def flickr_photos_links(api_key_or_file_path,                    # type: unicode
                         license_id=None,
                         verbose=False,
                         ignore_errors=False,
-                        max_errors_retry=3
+                        max_error_retries=3
                         ):
     # type: (...) -> list(unicode)
 
     retry = 0
     links = []
 
-    while retry < max_errors_retry:
+    while retry < max_error_retries:
         links = []
 
         try:
@@ -184,7 +184,7 @@ def flickr_photos_links(api_key_or_file_path,                    # type: unicode
             if verbose or not ignore_errors:
                 print(u"Value Error in flickr_photos_links process:")
                 print(v.message)
-                if retry<max_errors_retry:
+                if retry<max_error_retries:
                     print(u"Retry {}".format(retry))
         return links
 
@@ -208,13 +208,14 @@ def flickr_photos_downloader(api_key_or_file_path,                    # type: un
                              save_filename_prefix=u"flickr_",
                              forced_extension=None,
                              verbose=False,
-                             ignore_errors=False
+                             ignore_errors=False,
+                             max_error_retries=3
                              ):
     # type: (...) -> list(unicode)
 
     links = flickr_photos_links(api_key_or_file_path=api_key_or_file_path, query_text=query_text, tags=tags, n_images=n_images,
                                 image_size=image_size, tag_mode=tag_mode, content_type=content_type, media=media,
-                                verbose=verbose, ignore_errors=ignore_errors, license_id=license_id)
+                                verbose=verbose, ignore_errors=ignore_errors, license_id=license_id, max_errors_retry=max_error_retries)
     web_downloader(link_list=links, download_path=download_path, save_filename_prefix=save_filename_prefix,
                    forced_extension=forced_extension, verbose=verbose, ignore_errors=ignore_errors)
     return links
