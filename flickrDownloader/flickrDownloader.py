@@ -136,39 +136,62 @@ def flickr_photos_links(api_key_or_file_path,                    # type: unicode
                         media=FlickrMedia.default,               # type: FlickrMedia
                         license_id=None,
                         verbose=False,
-                        ignore_errors=False
+                        ignore_errors=False,
+                        max_errors_retry=3
                         ):
     # type: (...) -> list(unicode)
 
-    responses = flickr_photos_search(api_key_or_file_path=api_key_or_file_path,  n_images=n_images,
-                                     query_text=query_text, tags=tags, tag_mode=tag_mode,
-                                     content_type=content_type, media=media,
-                                     response_format=FlickrResponseFormat.JSON, license_id=license_id)
+    retry = 0
     links = []
 
-    for response in responses:
-        if response.ok:
-            content = response.content
-            data = json.loads(content)
-            if 'photos' in data.keys():
-                data = data['photos']['photo']
-                for d in data:
-                    # https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
-                    lnk = u"https://farm{}.staticflickr.com/{}/{}_{}{}.jpg"\
-                        .format(d['farm'], d['server'], d['id'], d['secret'], image_size.value)
-                    links.append(lnk)
-            else:
-                if not ignore_errors:
-                    print(u"Format error in received json (can't find key 'photos').")
-                    if 'message' in data.keys():
-                        print(u"Received Message: {}".format(data['message'].encode("utf-8")))
+    while retry < max_errors_retry:
+        links = []
 
-        else:
-            if not ignore_errors:
-                print(u"Flickr response not ok.")
-    if verbose:
-        print(u"Links retrived from flickr responses: {}".format(len(links)))
-    return links
+        try:
+            responses = flickr_photos_search(api_key_or_file_path=api_key_or_file_path,  n_images=n_images,
+                                             query_text=query_text, tags=tags, tag_mode=tag_mode,
+                                             content_type=content_type, media=media,
+                                             response_format=FlickrResponseFormat.JSON, license_id=license_id)
+
+            for response in responses:
+                if response.ok:
+                    content = response.content
+                    data = json.loads(content)
+
+
+                    if 'photos' in data.keys():
+                        data = data['photos']['photo']
+                        for d in data:
+                            # https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
+                            lnk = u"https://farm{}.staticflickr.com/{}/{}_{}{}.jpg"\
+                                .format(d['farm'], d['server'], d['id'], d['secret'], image_size.value)
+                            links.append(lnk)
+                    else:
+                        if not ignore_errors:
+                            print(u"Format error in received json (can't find key 'photos').")
+                            if 'message' in data.keys():
+                                print(u"Received Message: {}".format(data['message'].encode("utf-8")))
+
+                else:
+                    if not ignore_errors:
+                        print(u"Flickr response not ok.")
+            if verbose:
+                print(u"Links retrived from flickr responses: {}".format(len(links)))
+            return links
+
+        except ValueError as v:
+            retry-=1
+            if verbose or not ignore_errors:
+                print(u"Value Error in flickr_photos_links process:")
+                print(v.message)
+                if retry<max_errors_retry:
+                    print(u"Retry {}".format(retry))
+        return links
+
+
+
+
+
 
 
 
