@@ -1,4 +1,5 @@
 import json
+import urllib2
 from enum import Enum
 import requests
 from requests import Response
@@ -102,11 +103,14 @@ def flickr_photos_search(api_key_or_file_path,                      # type: unic
         query_text = unicode(query_text, "UTF-8")
     if isinstance(tags, str):
         tags = unicode(tags, "UTF-8")
-    if isinstance(query_text, unicode):
-        query += u"&text=" + query_text
-    if isinstance(tags, unicode):
-        query += u"&tags=" + tags + tag_mode.value
-    #  query.replace(" ", "%20")
+    #if isinstance(query_text, unicode):
+    if query_text is not None:
+        query += u"&text=" + urllib2.quote(query_text.encode('utf-8'))
+
+    #if isinstance(tags, unicode):
+    if tags is not None:
+        query += u"&tags=" + urllib2.quote(tags.encode('utf-8')) + tag_mode.value
+        #  query.replace(" ", "%20")
     query += content_type.value + media.value + response_format.value + FlickrPrivacyFilter.public.value
 
     if license_id is not None:
@@ -215,7 +219,7 @@ def flickr_photos_downloader(api_key_or_file_path,                    # type: un
 
     links = flickr_photos_links(api_key_or_file_path=api_key_or_file_path, query_text=query_text, tags=tags, n_images=n_images,
                                 image_size=image_size, tag_mode=tag_mode, content_type=content_type, media=media,
-                                verbose=verbose, ignore_errors=ignore_errors, license_id=license_id, max_errors_retry=max_error_retries)
+                                verbose=verbose, ignore_errors=ignore_errors, license_id=license_id, max_error_retries=max_error_retries)
     web_downloader(link_list=links, download_path=download_path, save_filename_prefix=save_filename_prefix,
                    forced_extension=forced_extension, verbose=verbose, ignore_errors=ignore_errors)
     return links

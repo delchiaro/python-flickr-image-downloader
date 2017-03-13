@@ -3,7 +3,7 @@ from setuptools import find_packages
 
 
 setup(name='flickrDownloader',
-      version='0.1.2',
+      version='0.1.3',
       description='Helper for Flickr photos.search API',
       author='Riccardo Del Chiaro',
       author_email='riccardo.delchiaro@gmail.com',

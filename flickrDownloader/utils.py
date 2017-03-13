@@ -1,5 +1,7 @@
 import os
-
+import urllib2
+from urllib2 import Request, urlopen
+from urllib2 import URLError, HTTPError
 
 def string_or_path(string_or_file):
     if os.path.isfile(string_or_file):
@@ -9,7 +11,7 @@ def string_or_path(string_or_file):
     return ret
 
 
-def web_downloader(link_list, download_path, save_filename_prefix="", forced_extension=None,
+def web_downloader(link_list, download_path, save_filename_prefix="", save_filename_postfix="_", forced_extension=None,
                    verbose=False, ignore_errors=False):
     # type: (list(str), str, str, str, bool, bool) -> None
 
@@ -21,8 +23,6 @@ def web_downloader(link_list, download_path, save_filename_prefix="", forced_ext
 
     error_count = 0
     for k, link in enumerate(link_list):
-        from urllib2 import Request, urlopen
-        from urllib2 import URLError, HTTPError
 
         try:
             req = Request(link, headers=client_header)
@@ -31,7 +31,8 @@ def web_downloader(link_list, download_path, save_filename_prefix="", forced_ext
                 extension = forced_extension
             else:
                 extension = os.path.splitext(link)[1].lower()
-            output_file = open(os.path.join(download_path, save_filename_prefix + str(k) + extension), 'wb')
+            output_file = open(os.path.join(download_path, save_filename_prefix + save_filename_postfix + str(k)
+                                            + extension), 'wb')
             data = response.read()
             output_file.write(data)
             response.close()
@@ -54,9 +55,29 @@ def web_downloader(link_list, download_path, save_filename_prefix="", forced_ext
             if not ignore_errors:
                 print("URLError " + str(k))
 
+        except ValueError:
+            error_count += 1
+            if not ignore_errors:
+                print("ValueERROR " + str(k))
+
     if verbose:
         print("\nAll are downloaded")
     if verbose or not ignore_errors:
         print("Total Errors ----> " + str(error_count) )
 
     return error_count
+
+
+
+import re, urlparse
+def urlEncodeNonAscii(b):
+    return re.sub('[\x80-\xFF]', lambda c: '%%%02x' % ord(c.group(0)), b)
+
+
+# USE urllib2.quote instead
+# def iriToUri(iri):
+#     parts= urlparse.urlparse(iri)
+#     return urlparse.urlunparse(
+#         part.encode('idna') if parti==1 else urlEncodeNonAscii(part.encode('utf-8'))
+#         for parti, part in enumerate(parts)
+#     )
