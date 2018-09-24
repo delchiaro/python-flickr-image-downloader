@@ -21,7 +21,7 @@ https://www.flickr.com/services/api/explore/flickr.photos.licenses.getInfo
 ## Install
 git clone https://github.com/nagash91/python-flickr-image-downloader.git <br />
 cd python-flickr-image-downloader <br />
-sudo python setup.py install <br />
+python setup.py install <br />
  <br />
 
 ## Usage
