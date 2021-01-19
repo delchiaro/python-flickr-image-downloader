@@ -65,9 +65,11 @@ only_link = flickr_photos_links(api_key,
 for i, link in enumerate(only_link):
     print str(i) + "\t-\t" + link                       
 ```
- <br />
+
+<br />
  <br />
 Available options:
+
 ```python
 # ENUM DEFINED FOR OPTIONS:
 
